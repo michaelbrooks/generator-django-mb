@@ -1,5 +1,5 @@
 {
-    "name": "generator-django-base",
+    "name": "generator-django-mb",
     "version": "0.1.4",
     "description": "Scaffold out a Django 1.7 web app with front-end support",
     "keywords": [
@@ -8,12 +8,11 @@
         "python",
         "yeoman"
     ],
-    "homepage": "https://github.com/santonocito/generator-django",
-    "bugs": "https://github.com/santonocito/generator-django/issues",
+    "homepage": "https://github.com/michaelbrooks/generator-django-mb",
+    "bugs": "https://github.com/michaelbrooks/generator-django-mb/issues",
     "author": {
-        "name": "Marco Santonocito",
-        "email": "hello@marcosantonocito.com",
-        "url": "http://www.marcosantonocito.com"
+        "name": "Michael Brooks",
+        "email": "mjbrooks@uw.edu"
     },
     "main": "app/index.js",
     "files": [
@@ -21,7 +20,7 @@
         "templates",
         "util.js"
     ],
-    "repository": "santonocito/generator-django-base",
+    "repository": "michaelbrooks/generator-django-mb",
     "scripts": {
         "test": "mocha"
     },

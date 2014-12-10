@@ -8,34 +8,24 @@ var chalk = require('chalk');
 
 var folderName = path.basename(process.cwd());
 
-yeoman.generators.Base.prototype.pipInstall = function (paths, options, cb) {
-    return this.runInstall('pip', paths, options, cb);
-};
-
 var DjangoGenerator = module.exports = function DjangoGenerator(args, options, config) {
     yeoman.generators.Base.apply(this, arguments);
 
-   this.on('end', function () {
-        this.installDependencies({
-            skipInstall: options['skip-install'],
-            callback: function() {
-                this.pipInstall(null, {
-                    requirement: 'requirements.txt'
-                }, function() {
-                    this.log
-                        .write()
-                        .info("Project name is '%s'", this.projectName)
-                        .info("Admin name is '%s'", this.adminName)
-                        .info("Admin email is '%s'", this.adminEmail)
-                        .write()
-                        .info("To start the server please follow these steps:")
-                        .info("Enter in your project folder: cd " + this.projectName)
-                        .info("Run: python manage.py syncdb")
-                        .info("Run: python manage.py runserver")
-                        .write();
-                }.bind(this));
-            }.bind(this)
-        });
+   this.on('end', function() {
+        this.log
+            .write()
+            .info("Project name is '%s'", this.projectName)
+            .info("Admin name is '%s'", this.adminName)
+            .info("Admin email is '%s'", this.adminEmail)
+            .write()
+            .info("If you have Vagrant installed, you can get running with: vagrant up")
+            .info("Otherwise, you will need to install other prerequisites.")
+            .write()
+            .info("To start the server:")
+            .info("Enter your project folder: cd " + this.projectName)
+            .info("Run: python manage.py migrate")
+            .info("Run: python manage.py runserver")
+            .write();
     });
 
     this.pkg = require('../package.json');
@@ -61,8 +51,8 @@ DjangoGenerator.prototype.askForProjectInfo = function askForProjectInfo() {
     var prompts = [{
         type: 'input',
         name: 'projectName',
-        message: 'What is your Django project name?',
-        default: folderName
+        message: 'What is your Django project name (should be letters and underscores, no hyphens)?',
+        default: folderName.replace('-', '_')
     }, {
         type: 'input',
         name: 'adminName',
@@ -77,6 +67,7 @@ DjangoGenerator.prototype.askForProjectInfo = function askForProjectInfo() {
 
     this.prompt(prompts, function (props) {
         this.projectName = props.projectName;
+        this.folderName = folderName;
         this.adminName = props.adminName;
         this.adminEmail = props.adminEmail;
 
@@ -86,51 +77,35 @@ DjangoGenerator.prototype.askForProjectInfo = function askForProjectInfo() {
 
 DjangoGenerator.prototype.askForDatabase = function askForDatabase() {
     var cb = this.async();
-    function isActive(answers) { return answers && answers.database && (answers.database == 'mysql' || answers.database == 'postgresql'); };
+
+    this.log('\nThe Django project will include configuration for a Vagrant VM.');
+    this.log('Please provide default database configuration for the Vagrant machine...\n');
 
     var prompts = [{
-        type: 'list',
-        name: 'database',
-        message: 'Which database would you like to use?',
-        choices: [
-            {
-                value: 'mysql',
-                name: 'MySQL',
-            }, {
-                value: 'sqlite3',
-                name: 'SQLite3'
-            }, {
-                value: 'postgresql',
-                name: 'PostgreSQL'
-            }
-        ]}, {
             type: 'input',
             name: 'databaseName',
             message: 'Please enter the database name',
             default: this.projectName
         }, {
-            when: function(answers){ return isActive(answers); },
             type: 'input',
             name: 'databaseUser',
             message: 'Please enter the database user',
-            default: 'root'
+            default: this.projectName
         }, {
-            when: function(answers){ return isActive(answers); },
             type: 'input',
             name: 'databasePassword',
-            message: 'Please enter the database password'
+            message: 'Please enter the database password',
+            default: this.projectName
         }, {
-            when: function(answers){ return isActive(answers); },
             type: 'input',
             name: 'databaseHost',
             message: 'Please enter the database host',
             default: 'localhost'
         }, {
-            when: function(answers){ return isActive(answers); },
             type: 'input',
             name: 'databasePort',
             message: 'Please enter the database port',
-            default: ''
+            default: '3306'
         }
     ];
 
@@ -139,14 +114,9 @@ DjangoGenerator.prototype.askForDatabase = function askForDatabase() {
 
         // manually deal with the response, get back and store the results.
         // we change a bit this way of doing to automatically do this in the self.prompt() method.
-        this.dbNone = isSelected('none');
-        this.dbMysql = isSelected('mysql');
-        this.dbSqlite3 = isSelected('sqlite3');
-        this.dbPostgres = isSelected('postgresql');
+        this.dbMysql = true;
 
-        if(this.dbSqlite3) {
-            this.databaseName = props.databaseName;
-        } else if (this.dbMysql || this.dbPostgres) {
+        if (this.dbMysql || this.dbPostgres) {
             this.databaseName = props.databaseName;
             this.databaseUser = props.databaseUser;
             this.databasePassword = props.databasePassword;
@@ -160,19 +130,12 @@ DjangoGenerator.prototype.askForDatabase = function askForDatabase() {
 
 DjangoGenerator.prototype.manage = function manage() {
     this.template('manage.py', path.join(this.projectName, 'manage.py'));
-}
+};
 
 DjangoGenerator.prototype.project = function project() {
     var projectFolder = path.join(this.projectName, this.projectName);
-
+    this.directory('project', projectFolder)
     this.copy('__init__.py', path.join(projectFolder, '__init__.py'));
-    this.template('project/urls.py', path.join(projectFolder, 'urls.py'));
-    this.template('project/wsgi.py', path.join(projectFolder, 'wsgi.py'));
-
-    this.copy('project/settings/__init__.py', path.join(projectFolder, 'settings/__init__.py'));
-    this.template('project/settings/base.py', path.join(projectFolder, 'settings/base.py'));
-    this.template('project/settings/local.py', path.join(projectFolder, 'settings/local.py'));
-    this.copy('project/settings/test.py', path.join(projectFolder, 'settings/test.py'));
 };
 
 DjangoGenerator.prototype.baseApp = function baseApp() {
@@ -199,6 +162,10 @@ DjangoGenerator.prototype.git = function git() {
     this.copy('_gitignore', '.gitignore');
 };
 
+DjangoGenerator.prototype.editor = function editor() {
+  this.copy('_editorconfig', '.editorconfig');
+};
+
 DjangoGenerator.prototype.bower = function bower() {
     this.template('_bower.json', 'bower.json');
 };
@@ -207,6 +174,16 @@ DjangoGenerator.prototype.npm = function npm() {
     this.template('_package.json', 'package.json');
 };
 
+DjangoGenerator.prototype.vagrant = function dot_env() {
+    this.template('Vagrantfile', 'Vagrantfile');
+    this.directory('setup', 'setup');
+};
+
+DjangoGenerator.prototype.fabric = function fabric() {
+    this.template('fabfile.py', 'fabfile.py');
+};
+
 DjangoGenerator.prototype.readme = function readme() {
     this.template('readme.md', 'README.md');
 };
+

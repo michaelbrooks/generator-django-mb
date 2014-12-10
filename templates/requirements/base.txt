@@ -9,9 +9,6 @@ psycopg2
 # Django stuff
 Django
 
-# for bcrypt passwords
-bcrypt
-
 # Templates
 django_compressor
 
@@ -37,3 +34,6 @@ bpython
 # Admin
 django-debug-toolbar
 
+# utils
+path.py
+dj-database-url

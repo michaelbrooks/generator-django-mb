@@ -1,0 +1,18 @@
+# Fill in these values with your deployment settings
+
+DJANGO_SETTINGS_MODULE=<%= projectName %>.settings.local
+
+# Where is your database?
+# https://github.com/kennethreitz/dj-database-url
+# e.g. mysql://USER:PASSWORD@HOST:PORT/NAME
+<% if (dbMysql) { %>
+DATABASE_URL=mysql://<%= databaseUser %>:<%= databasePassword %>@<%= databaseHost %>:<%= databasePort %>/<%= databaseName %>
+<% } else if (dbPostgres) { %>
+DATABASE_URL=postgres://<%= databaseUser %>:<%= databasePassword %>@<%= databaseHost %>:<%= databasePort %>/<%= databaseName %>
+<% } else { %>
+# DATABASE_URL=
+<% } %>
+
+SECRET_KEY=<%= secretKey %>
+GOOGLE_ANALYTICS_ID=
+

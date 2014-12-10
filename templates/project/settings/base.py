@@ -3,36 +3,40 @@ This is your project's main settings file that can be committed to your
 repo. If you need to override a setting locally, use local.py
 """
 
-from sys import path
+import sys
 import os
-
+from path import path
+import dj_database_url
 
 # Normally you should not import ANYTHING from Django directly
 # into your settings, but ImproperlyConfigured is an exception.
 from django.core.exceptions import ImproperlyConfigured
 
-def get_env_setting(setting):
+def get_env_setting(setting, default=None):
     """ Get the environment setting or return exception """
-    try:
-        return os.environ[setting]
-    except KeyError:
-        error_msg = "Set the %s env variable" % setting
-        raise ImproperlyConfigured(error_msg)
+    if default is not None:
+        return os.environ.get(setting, default)
+    else:
+        try:
+            return os.environ[setting]
+        except KeyError:
+            error_msg = "Set the %s env variable" % setting
+            raise ImproperlyConfigured(error_msg)
 
 
 ########## PATH CONFIGURATION
 # Absolute filesystem path to the Django project directory:
-DJANGO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DJANGO_ROOT = path(__file__).abspath().realpath().dirname().parent
 
 # Absolute filesystem path to the top-level project folder:
-SITE_ROOT = os.path.dirname(DJANGO_ROOT)
+SITE_ROOT = DJANGO_ROOT.parent
 
 # Site name:
-SITE_NAME = os.path.basename(DJANGO_ROOT)
+SITE_NAME = DJANGO_ROOT.basename()
 
 # Add our project to our pythonpath, this way we don't need to type our project
 # name in our dotted import paths:
-path.append(DJANGO_ROOT)
+sys.path.append(DJANGO_ROOT)
 ########## END PATH CONFIGURATION
 
 
@@ -62,13 +66,15 @@ MANAGERS = ADMINS
 
 ########## DATABASE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#databases
-DATABASES = {}
+DATABASES = {
+    'default': dj_database_url.config(default='sqlite:///%s' % (SITE_ROOT / 'local/development.sqlite'))
+}
 ########## END DATABASE CONFIGURATION
 
 
 ########## GENERAL CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#time-zone
-TIME_ZONE = 'America/Los_Angeles'
+TIME_ZONE = 'UTC'
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#language-code
 LANGUAGE_CODE = 'en-us'
@@ -86,7 +92,7 @@ USE_TZ = True
 
 ########## MEDIA CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#media-root
-MEDIA_ROOT = os.path.normpath(os.path.join(SITE_ROOT, 'media'))
+MEDIA_ROOT = (SITE_ROOT / 'media').normpath()
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#media-url
 MEDIA_URL = '/media/'
@@ -95,14 +101,14 @@ MEDIA_URL = '/media/'
 
 ########## STATIC FILE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#static-root
-STATIC_ROOT = os.path.normpath(os.path.join(SITE_ROOT, 'assets'))
+STATIC_ROOT = (SITE_ROOT / 'assets').normpath()
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 STATIC_URL = '/static/'
 
 # See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
 STATICFILES_DIRS = (
-    os.path.normpath(os.path.join(SITE_ROOT, 'static')),
+    (SITE_ROOT / 'static').normpath(),
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
@@ -116,7 +122,7 @@ STATICFILES_FINDERS = (
 
 ########## SECRET CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
-# SECRET_KEY = get_env_setting('SECRET_KEY')
+SECRET_KEY = get_env_setting('SECRET_KEY', 'secret')
 ########## END SECRET CONFIGURATION
 
 ########## TEST CONFIGURATION
@@ -135,7 +141,7 @@ ALLOWED_HOSTS = []
 ########## FIXTURE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-FIXTURE_DIRS
 FIXTURE_DIRS = (
-    os.path.normpath(os.path.join(SITE_ROOT, 'fixtures')),
+    (SITE_ROOT / 'fixtures').normpath(),
 )
 ########## END FIXTURE CONFIGURATION
 
@@ -152,6 +158,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.csrf',
     'django.core.context_processors.tz',
     'django.contrib.messages.context_processors.messages',
+    'base.context_processors.google_analytics',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
@@ -162,7 +169,7 @@ TEMPLATE_LOADERS = (
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
 TEMPLATE_DIRS = (
-    os.path.normpath(os.path.join(SITE_ROOT, 'templates')),
+    (SITE_ROOT / 'templates').normpath(),
 )
 ########## END TEMPLATE CONFIGURATION
 
@@ -199,7 +206,7 @@ DJANGO_APPS = (
     'django.contrib.staticfiles',
 
     # Useful template tags:
-    # 'django.contrib.humanize',
+    'django.contrib.humanize',
 
     # Admin panel and documentation:
     'django.contrib.admin',
@@ -295,11 +302,12 @@ INSTALLED_APPS += (
 )
 
 COMPRESS_PRECOMPILERS = (
+    ('text/less', 'less {infile} {outfile}'),
     ('text/x-sass', 'sass {infile} {outfile}'),
     ('text/x-scss', 'sass --scss {infile} {outfile}'),
 )
 
-COMPRESS_ROOT = os.path.normpath(os.path.join(SITE_ROOT, 'static'))
+COMPRESS_ROOT = (SITE_ROOT / 'static').normpath()
 COMPRESS_OUTPUT_DIR = 'compiled'
 ########## END SOUTH CONFIGURATION
 

@@ -38,3 +38,16 @@ tramp
 Thumbs.db
 Desktop.ini
 
+# Intellij Modules
+*.iml
+/.idea
+
+# Node
+/node_modules
+
+# Dist settings
+/.env
+/compiled
+
+/.fabricrc
+/.vagrant
