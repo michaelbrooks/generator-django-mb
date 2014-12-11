@@ -52,7 +52,7 @@ DjangoGenerator.prototype.askForProjectInfo = function askForProjectInfo() {
         type: 'input',
         name: 'projectName',
         message: 'What is your Django project name (should be letters and underscores, no hyphens)?',
-        default: folderName.replace('-', '_')
+        default: folderName.replace(/-/g, '_')
     }, {
         type: 'input',
         name: 'adminName',
