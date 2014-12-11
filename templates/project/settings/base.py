@@ -28,8 +28,11 @@ def get_env_setting(setting, default=None):
 # Absolute filesystem path to the Django project directory:
 DJANGO_ROOT = path(__file__).abspath().realpath().dirname().parent
 
-# Absolute filesystem path to the top-level project folder:
+# Absolute filesystem path to the django site folder
 SITE_ROOT = DJANGO_ROOT.parent
+
+# Absolute path to the top-level project folder
+PROJECT_ROOT = SITE_ROOT.parent
 
 # Site name:
 SITE_NAME = DJANGO_ROOT.basename()
@@ -297,18 +300,28 @@ INTERNAL_IPS = ('127.0.0.1',)
 ########## COMPRESSOR CONFIGURATION
 # See: http://django-compressor.readthedocs.org/en/latest/quickstart/
 INSTALLED_APPS += (
-    # Database migration helpers:
     'compressor',
 )
 
+def find_node_bin(package_name='less', bin_name='lessc'):
+    p = PROJECT_ROOT / 'node_modules' / '.bin' / bin_name
+    if p.exists():
+        return p
+    p = PROJECT_ROOT / 'node_modules' / package_name / 'bin' / bin_name
+    if p.exists():
+        return "node %s" % p
+    return bin_name # global install
+
+BIN_COFFEE = find_node_bin('coffee-script', 'coffee')
+BIN_LESSC = find_node_bin('less', 'lessc')
+
 COMPRESS_PRECOMPILERS = (
-    ('text/less', 'less {infile} {outfile}'),
-    ('text/x-sass', 'sass {infile} {outfile}'),
-    ('text/x-scss', 'sass --scss {infile} {outfile}'),
+    ('text/coffeescript', '%s --compile --stdio' % BIN_COFFEE),
+    ('text/less', '%s {infile} {outfile}' % BIN_LESSC),
 )
 
 COMPRESS_ROOT = (SITE_ROOT / 'static').normpath()
-COMPRESS_OUTPUT_DIR = 'compiled'
+COMPRESS_OUTPUT_DIR = 'CACHE'
 ########## END SOUTH CONFIGURATION
 
 

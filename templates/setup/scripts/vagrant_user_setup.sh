@@ -6,16 +6,16 @@
 # Die on errors
 set -e
 
-SITE_ROOT=/home/vagrant/<%= folderName %>
+PROJECT_ROOT=/home/vagrant/<%= folderName %>
 
 # Create a .env file
-cp $SITE_ROOT/setup/templates/vagrant_dot_env $SITE_ROOT/.env
+cp $PROJECT_ROOT/setup/templates/vagrant_dot_env $PROJECT_ROOT/.env
 
 # Load virtualenvwrapper functions
 source $(which virtualenvwrapper.sh)
 
 # Make a virtualenv
-mkvirtualenv <%= projectName %> -a $SITE_ROOT || true
+mkvirtualenv <%= projectName %> -a $PROJECT_ROOT || true
 
 # Install base python dependencies
 pip install -r requirements/local.txt

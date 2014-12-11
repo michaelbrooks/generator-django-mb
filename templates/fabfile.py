@@ -1,3 +1,8 @@
+"""
+Define common admin and maintenance tasks here.
+For more info: http://docs.fabfile.org/en/latest/
+"""
+
 import sys
 import os
 
@@ -8,9 +13,9 @@ from fabric.context_managers import warn_only, quiet, prefix, hide
 from contextlib import contextmanager as _contextmanager
 from path import path
 
-SITE_ROOT = path(__file__).abspath().realpath().dirname()
-DJANGO_ROOT = SITE_ROOT / '<%= projectName %>'
-sys.path.append(DJANGO_ROOT)
+PROJECT_ROOT = path(__file__).abspath().realpath().dirname()
+SITE_ROOT = PROJECT_ROOT / '<%= projectName %>'
+sys.path.append(SITE_ROOT)
 
 _env_already_read = None
 
@@ -21,7 +26,7 @@ def _read_env():
     if not _env_already_read:
         from <%= projectName %> import env_file
 
-        _env_already_read = env_file.read(SITE_ROOT / '.env')
+        _env_already_read = env_file.read(PROJECT_ROOT / '.env')
 
     return _env_already_read
 
@@ -36,7 +41,7 @@ def _read_package():
     if not _package_already_read:
         import json
 
-        with open(SITE_ROOT / 'package.json') as packfile:
+        with open(PROJECT_ROOT / 'package.json') as packfile:
             _package_already_read = json.load(packfile)
     return _package_already_read
 
@@ -51,26 +56,34 @@ def _get_settings():
 
     return settings
 
+def _symlink_supported():
+    with quiet():
+        if local('ln -s __linktest_target __linktest__source').succeeded:
+            local('rm -f __linktest_source')
+            return True
+        return False
 
 def dependencies():
-    """Installs local packages"""
+    """Installs Python, NPM, and Bower packages"""
 
     _target_local()
 
-    with lcd(SITE_ROOT):
+    with lcd(PROJECT_ROOT):
         print green("Installing python requirements...")
         for req in env.pip_requirements:
             local('pip install -r %s' % req)
 
-        print green("Installing node.js requirements...")
-        if os.name == 'nt':
-            local('npm install --no-bin-link')
-        else:
-            local('npm install')
+        if path('package.json').exists:
+            print green("Installing node.js requirements...")
+            if _symlink_supported():
+                local('npm install')
+            else:
+                local('npm install --no-bin-link')
 
-        print green("Installing bower requirements...")
-        local('bower install --config.interactive=false')
-        local('bower prune --config.interactive=false')
+        if path('bower.json').exists:
+            print green("Installing bower requirements...")
+            local('bower install --config.interactive=false')
+            local('bower prune --config.interactive=false')
 
 
 def update_app():
@@ -83,7 +96,7 @@ def update_app():
 
 
 def _manage_py(args):
-    with lcd(DJANGO_ROOT):
+    with lcd(SITE_ROOT):
         local('python manage.py %s' % args)
 
 

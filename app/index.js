@@ -168,6 +168,7 @@ DjangoGenerator.prototype.editor = function editor() {
 
 DjangoGenerator.prototype.bower = function bower() {
     this.template('_bower.json', 'bower.json');
+    this.template('_bowerrc', '.bowerrc');
 };
 
 DjangoGenerator.prototype.npm = function npm() {

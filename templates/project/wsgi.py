@@ -17,8 +17,8 @@ import os
 import sys
 from path import path
 
-SITE_ROOT = path(__file__).abspath().realpath().dirname().parent.parent
-sys.path.append(SITE_ROOT)
+PROJECT_ROOT = path(__file__).abspath().realpath().dirname().parent.parent
+sys.path.append(PROJECT_ROOT)
 
 # We defer to a DJANGO_SETTINGS_MODULE already in the environment. This breaks
 # if running multiple sites in the same mod_wsgi process. To fix this, use
@@ -28,7 +28,7 @@ os.environ['CELERY_LOADER'] = 'django'
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "<%= projectName %>.settings.production")
 
 import env_file
-env_file.load(SITE_ROOT / '.env')
+env_file.load(PROJECT_ROOT / '.env')
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION

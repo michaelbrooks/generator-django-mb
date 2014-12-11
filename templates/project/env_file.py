@@ -2,12 +2,12 @@ import os
 
 def read(envFile='.env'):
     result = {}
+
     try:
         with open(envFile) as f:
             content = f.read()
     except IOError:
-        content = ''
-        print "Env file %s not found!" % envFile
+        raise RuntimeError("Env file %s not found! Please create it." % envFile)
 
     import re
     for line in content.splitlines():

@@ -4,5 +4,8 @@
   "authors": [
     "<%= _.capitalize(adminName) %> <<%= adminEmail %>>"
   ],
-  "dependencies": {}
+  "dependencies": {
+    "coffee-script": "^1.8.0",
+    "less": "^2.1.1"
+  }
 }
