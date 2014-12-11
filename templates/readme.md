@@ -43,13 +43,7 @@ Instead, follow these steps:
 You will need to have the following packages installed:
 
 - Python 2.7
-<% if (dbMysql) { %>
-- MySQL 5.5
-<% } else if (dbPostgres) { %>
-- Postgres
-<% } else if (dbSqlite3) { %>
-- Sqlite 3
-<% } %>
+- <% if (dbMysql) { %>MySQL 5.5<% } else if (dbPostgres) { %>Postgres<% } else if (dbSqlite3) { %>Sqlite 3<% } %>
 - pip
 - Node.js with npm
 - [Bower](http://bower.io/)
@@ -195,3 +189,10 @@ update everything with:
 ```bash
 $ fab dependencies
 ```
+
+
+### Update the database
+
+If someone has added migrations, you can
+run `fab update_app` to run the migrations and update your
+development database.
