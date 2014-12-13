@@ -37,6 +37,9 @@ PROJECT_ROOT = SITE_ROOT.parent
 # Site name:
 SITE_NAME = DJANGO_ROOT.basename()
 
+# Id for the Sites framework
+SITE_ID = 1
+
 # Add our project to our pythonpath, this way we don't need to type our project
 # name in our dotted import paths:
 sys.path.append(DJANGO_ROOT)
